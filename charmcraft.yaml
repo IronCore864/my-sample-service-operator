@@ -1,0 +1,44 @@
+type: charm
+
+name: my-sample-service
+ 
+summary: Charm to operate my sample service.
+
+description: |
+  This is a charm to operate my sample service.
+
+bases:
+  - build-on:
+    - name: ubuntu
+      channel: "22.04"
+      architectures: [arm64]
+    run-on:
+    - name: ubuntu
+      channel: "22.04"
+      architectures: [arm64]
+  - build-on:
+    - name: ubuntu
+      channel: "22.04"
+      architectures: [amd64]
+    run-on:
+    - name: ubuntu
+      channel: "22.04"
+      architectures: [amd64]
+
+assumes:
+  - juju >= 3.4
+  - k8s-api
+
+containers:
+  my-sample-service:
+    resource: my-sample-service
+
+resources:
+  my-sample-service:
+    type: oci-image
+    description: image for my-sample-service
+    # The upstream-source field is ignored by Juju.
+    # It is included here as a reference so the integration testing suite knows which image to deploy during testing.
+    # This field is also used by the 'canonical/charming-actions' GitHub action for automated releasing.
+    # To deploy a local charm you need to explicitly define a --resource parameter with the same resource name and resource upstream source.
+    upstream-source: ironcore864/my-sample-service:1.0.0
