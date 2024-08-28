@@ -17,6 +17,10 @@ class MySampleServiceCharm(ops.CharmBase):
         framework.observe(
             self.on.my_sample_service_pebble_ready, self._update_layer_and_restart
         )
+        framework.observe(
+            self.on["my_sample_service"].pebble_custom_notice,
+            self._on_pebble_custom_notice,
+        )
 
     def _update_layer_and_restart(self, event) -> None:
         self.unit.status = ops.MaintenanceStatus("Assembling Pebble layers")
@@ -55,6 +59,12 @@ class MySampleServiceCharm(ops.CharmBase):
             },
         }
         return ops.pebble.Layer(pebble_layer)
+
+    def _on_pebble_custom_notice(self, event: ops.PebbleCustomNoticeEvent) -> None:
+        if event.notice.key == "guotiexin.com/db/backup":
+            path = event.notice.last_data["path"]
+            logger.info("Backup finished. Backup file: %s", path)
+            logger.info("Uploading backup file to ...")
 
 
 if __name__ == "__main__":
