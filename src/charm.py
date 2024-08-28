@@ -57,15 +57,6 @@ class MySampleServiceCharm(ops.CharmBase):
                     "startup": "enabled",
                 }
             },
-            "checks": {
-                "health": {
-                    "override": "replace",
-                    "threshold": 1,
-                    "http": {
-                        "url": "http://localhost:8080/health",
-                    },
-                },
-            },
         }
         return ops.pebble.Layer(pebble_layer)
 
