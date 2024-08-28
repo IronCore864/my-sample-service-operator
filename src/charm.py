@@ -21,6 +21,14 @@ class MySampleServiceCharm(ops.CharmBase):
             self.on["my_sample_service"].pebble_custom_notice,
             self._on_pebble_custom_notice,
         )
+        framework.observe(
+            self.on["my_sample_service"].pebble_check_failed,
+            self._on_pebble_check_failed,
+        )
+        framework.observe(
+            self.on["my_sample_service"].pebble_check_recovered,
+            self._on_pebble_check_recovered,
+        )
 
     def _update_layer_and_restart(self, event) -> None:
         self.unit.status = ops.MaintenanceStatus("Assembling Pebble layers")
@@ -57,6 +65,15 @@ class MySampleServiceCharm(ops.CharmBase):
                     "startup": "enabled",
                 }
             },
+            "checks": {
+                "health": {
+                    "override": "replace",
+                    "threshold": 1,
+                    "http": {
+                        "url": "http://localhost:8080/health",
+                    },
+                },
+            },
         }
         return ops.pebble.Layer(pebble_layer)
 
@@ -65,6 +82,16 @@ class MySampleServiceCharm(ops.CharmBase):
             path = event.notice.last_data["path"]
             logger.info("Backup finished. Backup file: %s", path)
             logger.info("Uploading backup file to ...")
+
+    def _on_pebble_check_failed(self, event: ops.PebbleCheckFailedEvent):
+        if event.info.name == "health":
+            logger.info("The http health check failed!")
+            self.unit.status = ops.ActiveStatus("Degraded functionality ...")
+
+    def _on_pebble_check_recovered(self, event: ops.PebbleCheckRecoveredEvent):
+        if event.info.name == "health":
+            logger.info("The http health check has recovered!")
+            self.unit.status = ops.ActiveStatus()
 
 
 if __name__ == "__main__":
