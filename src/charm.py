@@ -74,6 +74,14 @@ class MySampleServiceCharm(ops.CharmBase):
                     },
                 },
             },
+            "log-targets": {
+                "staging-logs": {
+                    "override": "merge",
+                    "type": "loki",
+                    "location": "http://loki.loki.svc.cluster.local:3100/loki/api/v1/push",
+                    "services": ["all"],
+                },
+            },
         }
         return ops.pebble.Layer(pebble_layer)
 
